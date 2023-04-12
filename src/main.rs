@@ -12,7 +12,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let search_string = &args[2];
 
     let file = File::open(csv_file)?;
-    let reader = BufReader::new(file);
+    let mut reader = BufReader::new(file);
     let mut buffer = Vec::new();
     reader.read_to_end(&mut buffer)?;
 
@@ -23,7 +23,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     rdr.records().par_bridge().for_each(|result| {
         if let Ok(record) = result {
-            if record.contains(search_string) {
+            if record.iter().any(|field| field.contains(search_string)) {
                 records.lock().unwrap().push(record);
             }
         }
