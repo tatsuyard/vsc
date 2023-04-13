@@ -1,4 +1,4 @@
-use csv::{ReaderBuilder, StringRecord};
+use csv::ReaderBuilder;
 use rayon::prelude::*;
 use std::env;
 use std::error::Error;
@@ -16,7 +16,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut buffer = Vec::new();
     reader.read_to_end(&mut buffer)?;
 
-    let mut records = Arc::new(Mutex::new(Vec::new()));
+    let records = Arc::new(Mutex::new(Vec::new()));
     let mut rdr = ReaderBuilder::new()
         .has_headers(false)
         .from_reader(&buffer[..]);
@@ -24,6 +24,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     rdr.records().par_bridge().for_each(|result| {
         if let Ok(record) = result {
             if record.iter().any(|field| field.contains(search_string)) {
+                print!("{} ", record.len());
                 records.lock().unwrap().push(record);
             }
         }
